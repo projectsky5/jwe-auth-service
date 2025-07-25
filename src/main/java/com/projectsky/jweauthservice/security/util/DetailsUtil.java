@@ -2,12 +2,10 @@ package com.projectsky.jweauthservice.security.util;
 
 import lombok.experimental.UtilityClass;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 @UtilityClass
-@Component
 public class DetailsUtil {
 
     public static Map<String, Object> getDetails(Authentication authentication){
