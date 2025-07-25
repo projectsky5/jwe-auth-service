@@ -1,5 +1,6 @@
 package com.projectsky.jweauthservice.config;
 
+import com.projectsky.jweauthservice.security.JweAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,11 +13,14 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @RequiredArgsConstructor
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final JweAuthFilter jweAuthFilter;
 
     private static final String[] PUBLIC_URLS = {
             "/api/v1/auth/login",
@@ -42,9 +46,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/role/toggle").authenticated()
                         .requestMatchers("/api/v1/token/revoke").authenticated()
                         .requestMatchers("/api/v1/hello/user").hasAuthority("user")
-                        .requestMatchers("/api/v1/hello/user/admin").hasAuthority("admin")
+                        .requestMatchers("/api/v1/hello/admin").hasAuthority("admin")
                         .anyRequest().hasAnyAuthority("admin", "user")
                 )
+                .addFilterBefore(jweAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
@@ -56,6 +61,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(6);
+        return new BCryptPasswordEncoder(10);
     }
 }
