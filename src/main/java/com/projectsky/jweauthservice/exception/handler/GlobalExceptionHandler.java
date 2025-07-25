@@ -1,5 +1,7 @@
 package com.projectsky.jweauthservice.exception.handler;
 
+import com.nimbusds.jose.proc.BadJWEException;
+import com.nimbusds.jwt.proc.BadJWTException;
 import com.projectsky.jweauthservice.exception.InvalidTokenException;
 import com.projectsky.jweauthservice.exception.JwtAuthenticationException;
 import com.projectsky.jweauthservice.exception.UserAlreadyExistsException;
@@ -47,30 +49,6 @@ public class GlobalExceptionHandler {
                         .timestamp(LocalDateTime.now())
                         .path(request.getRequestURI())
                         .subErrors(subErrors)
-                        .build());
-    }
-
-    @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidTokenException(HttpServletRequest req, InvalidTokenException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ErrorResponse.builder()
-                        .status(HttpStatus.UNAUTHORIZED.value())
-                        .message(ex.getMessage())
-                        .timestamp(LocalDateTime.now())
-                        .path(req.getRequestURI())
-                        .subErrors(Collections.emptyList())
-                        .build());
-    }
-
-    @ExceptionHandler(JwtAuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleJwtAuthenticationException(HttpServletRequest req, JwtAuthenticationException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ErrorResponse.builder()
-                        .status(HttpStatus.UNAUTHORIZED.value())
-                        .message(ex.getMessage())
-                        .timestamp(LocalDateTime.now())
-                        .path(req.getRequestURI())
-                        .subErrors(Collections.emptyList())
                         .build());
     }
 
@@ -122,7 +100,7 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
-    @ExceptionHandler(IllegalStateException.class)
+    @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalStateException(HttpServletRequest req, IllegalStateException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED) // т.к IllegalStateException в сервисе возвращается только при ошибках security
                 .body(ErrorResponse.builder()
