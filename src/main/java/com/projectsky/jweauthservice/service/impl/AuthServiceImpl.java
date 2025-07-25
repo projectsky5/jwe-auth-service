@@ -14,7 +14,7 @@ import com.projectsky.jweauthservice.security.util.DetailsUtil;
 import com.projectsky.jweauthservice.service.AuthService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -27,6 +27,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
@@ -53,6 +54,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         User user = (User) authentication.getPrincipal(); // Получение юзера
+        log.debug("User: {} trying to switch role", user.getId());
 
         Map<String, Object> details = DetailsUtil.getDetails(authentication); // Детали из Authentication
 
@@ -78,13 +80,16 @@ public class AuthServiceImpl implements AuthService {
                         .username(user.getUsername())
                         .build());
 
+        log.debug("User: {} successfully switched role", user.getId());
         return new TokenDto(token);
     }
 
     @Override
     @Transactional
     public TokenDto register(RegisterRequest request){
+        log.debug("Registering user: {}", request.username());
         if(userRepository.existsByUsername(request.username())){
+            log.warn("User {} already exists", request.username());
             throw new UserAlreadyExistsException("User already exists");
         }
 
@@ -108,12 +113,14 @@ public class AuthServiceImpl implements AuthService {
                         .username(user.getUsername())
                         .build());
 
+        log.debug("User: {} successfully registered, id={}", user.getUsername(), user.getId());
         return new TokenDto(token);
     }
 
     @Override
     @Transactional
     public TokenDto login(LoginRequest request) {
+        log.debug("Login request: {}", request.username());
         User user = userRepository.findByUsername(request.username())
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
@@ -132,6 +139,7 @@ public class AuthServiceImpl implements AuthService {
                         .username(user.getUsername())
                         .build());
 
+        log.debug("User: {} successfully logged in", user.getUsername());
         return new TokenDto(token);
     }
 }
